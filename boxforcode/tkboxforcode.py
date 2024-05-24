@@ -1,13 +1,13 @@
-# Author :- Aryan Khandelwal
-
 """
 This is a simple Text Editor
 Made with Tkinter Module in Python
 """
 
+__author__ = "Aryan Khandelwal, Jake Gustafson"
+
 import tkinter as tk
 from tkinter import ttk
-from tkinter import *
+# from tkinter import *
 from functools import partial
 from tkinter import messagebox
 from tkinter import filedialog
@@ -18,35 +18,7 @@ import enchant
 from ttkthemes import ThemedTk
 import pastebin
 
-
-class MyScroll(Text):
-    """
-    Class used to Make a TextWidget
-    having horizontal and vertical
-    scrollbars
-    """
-
-    def __init__(self, master=None, **kw):
-        self.frame = ttk.Frame(master)
-        self.vbar = ttk.Scrollbar(self.frame, command=self.yview)
-        self.vbar.pack(side=RIGHT, fill=Y)
-        self.hbar = ttk.Scrollbar(
-            self.frame, orient="horizontal", command=self.xview)
-        self.hbar.pack(side=BOTTOM, fill=X)
-        kw.update({'yscrollcommand': self.vbar.set})
-        kw.update({'xscrollcommand': self.hbar.set})
-        Text.__init__(self, self.frame, **kw)
-        self.pack(side=LEFT, fill=BOTH, expand=True)
-        text_meths = vars(Text).keys()
-        methods = vars(Pack).keys() | vars(Grid).keys() | vars(Place).keys()
-        methods = methods.difference(text_meths)
-
-        for m in methods:
-            if m[0] != '_' and m != 'config' and m != 'configure':
-                setattr(self, m, getattr(self.frame, m))
-
-    def __str__(self):
-        return str(self.frame)
+from boxforcode.boxfortextscroll import BoxForTextScroll
 
 
 class Editor:
@@ -59,21 +31,21 @@ class Editor:
     window.geometry(
         "{0}x{1}+0+0".format(window.winfo_screenwidth(),
                              window.winfo_screenheight()))
-    menuBar = Menu(window)
+    menuBar = tk.Menu(window)
     # the text and entry frames column
     window.grid_columnconfigure(1, weight=1)
     window.grid_rowconfigure(0, weight=1)
     # window.grid_rowconfigure(1, weight=1)  # all frames row
     window.config(menu=menuBar)
-    fileMenu = Menu(menuBar, tearoff=0)
-    editMenu = Menu(menuBar, tearoff=0)
-    viewMenu = Menu(menuBar, tearoff=0)
-    helpMenu = Menu(menuBar, tearoff=0)
-    txt = MyScroll(window, undo=True)
+    fileMenu = tk.Menu(menuBar, tearoff=0)
+    editMenu = tk.Menu(menuBar, tearoff=0)
+    viewMenu = tk.Menu(menuBar, tearoff=0)
+    helpMenu = tk.Menu(menuBar, tearoff=0)
+    txt = BoxForTextScroll(window, undo=True)
     txt.grid(row=0, column=1, sticky="NSEW")
-    lineNumber = Canvas(window, width="30", height="500")
+    lineNumber = tk.Canvas(window, width="30", height="500")
     lineNumber.grid(row=0, column=0, sticky='NS', pady=1, rowspan=3)
-    wordCount = StringVar()
+    wordCount = tk.StringVar()
     wordCount.set("Word Count -> 0")
     statusBar = ttk.Label(window, textvariable=wordCount)
     statusBar.grid(row=2, column=1, columnspan=2, sticky="EW")
@@ -92,7 +64,7 @@ class Editor:
             label="Open", command=self.open_file, accelerator="Ctrl+O")
         self.window.bind_all('<Control-o>', self.open_file)
         self.fileMenu.add_command(
-            label="Save", command=self.save_file,  accelerator="Ctrl+S")
+            label="Save", command=self.save_file, accelerator="Ctrl+S")
         self.window.bind_all('<Control-s>', self.save_file)
         self.fileMenu.add_command(
             label="Save As", command=self.save_file_as,
@@ -100,7 +72,7 @@ class Editor:
         self.window.bind_all('<Control-S>', self.save_file_as)
         self.fileMenu.add_command(label="Exit", command=self.exit)
         self.menuBar.add_cascade(label="File", menu=self.fileMenu)
-        self.editMenu = Menu(self.menuBar, tearoff=0)
+        self.editMenu = tk.Menu(self.menuBar, tearoff=0)
         self.editMenu.add_command(label="Cut", command=self.cut)
         self.editMenu.add_command(
             label="Copy", command=self.copy, accelerator="Ctrl+C")
@@ -141,7 +113,7 @@ class Editor:
         self.editMenu.add_command(
             label="Select All", command=self.selectall, accelerator="Ctrl+A")
         self.window.bind_all('<Control-a>', self.selectall)
-        themeBar = Menu(self.viewMenu)
+        themeBar = tk.Menu(self.viewMenu)
         themeBar.add_command(label="Blacko", command=partial(
             self.change_theme, "blacko"))
         themeBar.add_command(label="Whity", command=partial(
@@ -153,13 +125,13 @@ class Editor:
         self.window.mainloop()
 
     def new_file(self, event=None):
-        if(messagebox.askyesno("Save?", "Do you wish to save current file?")):
+        if messagebox.askyesno("Save?", "Do you wish to save current file?"):
             self.save_file()
-            self.txt.delete('1.0', END)
+            self.txt.delete('1.0', tk.END)
             self.window.title("Notepad")
             self.currentFile = "No File"
         else:
-            self.txt.delete('1.0', END)
+            self.txt.delete('1.0', tk.END)
             self.window.title("Notepad")
             self.currentFile = "No File"
 
@@ -170,7 +142,7 @@ class Editor:
         if myFile is not None:
             self.window.title(os.path.basename(myFile.name))
             content = myFile.read()
-            self.txt.delete('1.0', END)
+            self.txt.delete('1.0', tk.END)
             self.txt.insert(1.0, content)
             self.currentFile = myFile.name
             myFile.close()
@@ -180,7 +152,7 @@ class Editor:
         print("saving file")
         myFile = filedialog.asksaveasfile(mode="w")
         if myFile is not None:
-            myFile.write(self.txt.get('1.0', END))
+            myFile.write(self.txt.get('1.0', tk.END))
             self.currentFile = myFile.name
             myFile.close()
             self.window.title(os.path.basename(myFile.name))
@@ -191,7 +163,7 @@ class Editor:
             self.save_file_as(event)
         else:
             myFile = open(self.currentFile, "w")
-            myFile.write(self.txt.get('1.0', END))
+            myFile.write(self.txt.get('1.0', tk.END))
             myFile.close()
 
     def copy(self):
@@ -201,11 +173,11 @@ class Editor:
 
     def cut(self):
         self.copy()
-        self.txt.delete(SEL_FIRST, SEL_LAST)
+        self.txt.delete(tk.SEL_FIRST, tk.SEL_LAST)
 
     def paste(self):
-        self.txt.insert(INSERT, self.txt.clipboard_get())
-        self.redraw(event)
+        self.txt.insert(tk.INSERT, self.txt.clipboard_get())
+        self.redraw(tk.event)
 
     def undo(self, event=None):
         self.txt.edit_undo()
@@ -214,7 +186,7 @@ class Editor:
         self.txt.edit_redo()
 
     def find(self, event=None):
-        root = Toplevel(self.window)
+        root = tk.Toplevel(self.window)
         root.title("Find")
         root.transient(self.window)
         root.focus_force()
@@ -242,13 +214,13 @@ class Editor:
         def copy_link(self, link):
             self.txt.clipboard_clear()
             self.txt.clipboard_append(link)
-        root = Toplevel(self.window)
+        root = tk.Toplevel(self.window)
         root.title("Link")
         root.transient(self.window)
         root.focus_force()
         root.grid_columnconfigure(0, weight=1)
         root.grid_rowconfigure(0, weight=1)
-        link = pastebin.pastebin(self.txt.get('1.0', END))
+        link = pastebin.pastebin(self.txt.get('1.0', tk.END))
         lb = ttk.Label(root, text=link)
         lb.grid(row=0, column=0, padx="50", pady="20")
         bt = ttk.Button(root, text="Copy", command=copy_link(self, link))
@@ -266,18 +238,18 @@ class Editor:
 
     def find_string(self, findString):
         startInd = '1.0'
-        while(startInd):
-            startInd = self.txt.search(findString, startInd, stopindex=END)
+        while startInd:
+            startInd = self.txt.search(findString, startInd, stopindex=tk.END)
             if startInd:
                 startInd = str(startInd)
-                lastInd = startInd+f'+{len(findString)}c'
+                lastInd = startInd + f'+{len(findString)}c'
                 print(startInd, lastInd)
                 self.txt.tag_add('highlight', startInd, lastInd)
                 startInd = lastInd
 
     def replace(self, event=None):
         print("coming replace")
-        root = Toplevel(self.window)
+        root = tk.Toplevel(self.window)
         root.title("Find and Replace")
         root.transient(self.window)
         root.focus_force()
@@ -295,9 +267,9 @@ class Editor:
         def replace():
             findString = e1.get()
             replaceString = e2.get()
-            myText = self.txt.get('1.0', END)
+            myText = self.txt.get('1.0', tk.END)
             myText = myText.replace(findString, replaceString)
-            self.txt.delete('1.0', END)
+            self.txt.delete('1.0', tk.END)
             self.txt.insert('1.0', myText)
             root.destroy()
 
@@ -311,7 +283,7 @@ class Editor:
         replaceButton.grid(row=2, column=1, padx=10, pady=5)
         root.protocol("WM_DELETE_WINDOW", on_closing)
 
-    def redraw(self, event=NONE):
+    def redraw(self, event=tk.NONE):
         self.update_count(event)
         self.lineNumber.delete("all")
         self.objectIds = []
@@ -327,7 +299,7 @@ class Editor:
             si = self.txt.index(f"{si}+1line")
 
     def update_count(self, event):
-        count = self.txt.get('1.0', END)
+        count = self.txt.get('1.0', tk.END)
         self.wordCount.set(f"Word Count -> {len(count)-1}")
 
     def font_size(self):
@@ -345,21 +317,21 @@ class Editor:
     def spell_err(self, findString):
         """Check for Spelling Errors"""
         startInd = '1.0'
-        while(startInd):
-            startInd = self.txt.search(findString, startInd, stopindex=END)
+        while startInd:
+            startInd = self.txt.search(findString, startInd, stopindex=tk.END)
             if startInd:
                 startInd = str(startInd)
-                lastInd = startInd+f'+{len(findString)}c'
+                lastInd = startInd + f'+{len(findString)}c'
                 print(startInd, lastInd)
                 self.txt.tag_add('misspell', startInd, lastInd)
                 startInd = lastInd
 
-    def spell_check(self, event=NONE):
+    def spell_check(self, event=tk.NONE):
         self.txt.tag_delete('misspell')
         words = self.txt.get('1.0', "end-1c").split()
         for word in words:
             # print(word)
-            if (self.word_exist(word) == FALSE):
+            if (self.word_exist(word) == tk.FALSE):
                 self.spell_err(word)
 
         self.txt.tag_config('misspell', background="red", foreground="white")
@@ -389,14 +361,14 @@ class Editor:
             self.window['theme'] = 'arc'
             self.lineNumber.config(bg="#9de1fd")
             self.txt.config(bg="white", fg="black", insertbackground="black")
-            self.menuBar.config(bg="#9de1fd", fg="black", relief=RAISED)
+            self.menuBar.config(bg="#9de1fd", fg="black", relief=tk.RAISED)
 
     def about(self):
         print("about")
         messagebox.showinfo("About", "Your Own Personalized Notepad")
 
     def exit(self):
-        if(messagebox.askyesno('Quit', 'Are you sure you want to quit')):
+        if messagebox.askyesno('Quit', 'Are you sure you want to quit'):
             self.window.destroy()
 
 
