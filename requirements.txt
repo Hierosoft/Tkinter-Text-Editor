@@ -8,6 +8,7 @@ pyenchant
 Pygments
 pylint
 pyttsx3
+requests
 six
 ttkthemes
 typed-ast
